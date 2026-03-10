@@ -39,9 +39,9 @@ def _row_for_spendee(tx: Transaction) -> list[str]:
     from datetime import timezone as _tz
 
     date_str = tx.date.astimezone(_tz.utc).isoformat(timespec="seconds")
-    tx_type = TransactionType.INCOME.value if tx.uah_amount >= 0 else TransactionType.EXPENSE.value
+    tx_type = TransactionType.INCOME.value if tx.second_amount >= 0 else TransactionType.EXPENSE.value
     category_name = tx.category or ""
-    amount_str = f"{tx.uah_amount:.2f}"
+    amount_str = f"{tx.second_amount:.2f}"
     labels = ", ".join(tx.labels) if getattr(tx, "labels", None) else ""
 
     # Build note with description, original amount, currency, and exchange rate
@@ -50,10 +50,10 @@ def _row_for_spendee(tx: Transaction) -> list[str]:
         note_parts.append(tx.description)
 
     # Add original amount, currency, and exchange rate if different from UAH
-    if tx.currency and tx.currency != "UAH" and tx.original_amount != 0:
-        original_amount_str = f"{abs(tx.original_amount):.2f}"
+    if tx.currency and tx.currency != "UAH" and tx.primary_amount != 0:
+        original_amount_str = f"{abs(tx.primary_amount):.2f}"
         # Calculate exchange rate
-        exchange_rate = abs(tx.uah_amount) / abs(tx.original_amount)
+        exchange_rate = abs(tx.second_amount) / abs(tx.primary_amount)
         note_parts.append(f"({original_amount_str} {tx.currency} @ {exchange_rate:.2f})")
 
     note = " ".join(note_parts)
@@ -116,8 +116,8 @@ class SpendeeService:
                         Transaction(
                             id="",
                             date=dt,
-                            original_amount=amount,
-                            uah_amount=amount,
+                            primary_amount=amount,
+                            second_amount=amount,
                             currency=currency,
                             mcc=0,
                             description=note,

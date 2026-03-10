@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
@@ -17,8 +16,8 @@ class TransactionType(Enum):
 class Transaction(BaseModel):
     id: str
     date: datetime
-    original_amount: Decimal
-    uah_amount: Decimal
+    primary_amount: Decimal
+    second_amount: Decimal
     currency: str
     mcc: int
     description: str
@@ -36,7 +35,7 @@ class Transaction(BaseModel):
 
         Uses date, amount, type to identify duplicates.
         """
-        return (self.date.date(), abs(self.uah_amount), self.type.value)
+        return (self.date.date(), abs(self.second_amount), self.type.value)
 
     def to_dict(self) -> dict:
         """Export transaction as a dictionary for JSON serialization."""
@@ -44,8 +43,8 @@ class Transaction(BaseModel):
             "id": self.id,
             "date": self.date.isoformat(),
             "description": self.description,
-            "amount": float(self.uah_amount),
-            "original_amount": float(self.original_amount),
+            "second_amount": float(self.second_amount),
+            "primary_amount": float(self.primary_amount),
             "currency": self.currency,
             "category": self.category,
             "labels": self.labels,
@@ -61,7 +60,7 @@ class Transaction(BaseModel):
             self.date.date().isoformat(),
             self.type.value if self.type else "",
             self.category or "",
-            f"{self.uah_amount:.2f}",
+            f"{self.second_amount:.2f}",
             self.description or "",
             ", ".join(self.labels or []),
         ]

@@ -34,9 +34,9 @@ def export_comparison_csv(mono_txs: list, spendee_txs: list, output_path: str) -
             writer.writerow([
                 mono_tx.date.date().isoformat(),
                 mono_tx.description,
-                f"{mono_tx.uah_amount:.2f}",
-                f"{spendee_tx.uah_amount:.2f}",
-                f"{abs(mono_tx.uah_amount - spendee_tx.uah_amount):.2f}",
+                f"{mono_tx.second_amount:.2f}",
+                f"{spendee_tx.second_amount:.2f}",
+                f"{abs(mono_tx.second_amount - spendee_tx.second_amount):.2f}",
                 mono_tx.category or "",
                 spendee_tx.category or "",
                 "✓" if mono_tx.category == spendee_tx.category else "✗",
@@ -59,21 +59,21 @@ def export_comparison_json(mono_txs: list, spendee_txs: list, output_path: str) 
             "date": mono_tx.date.isoformat(),
             "description": mono_tx.description,
             "monobank": {
-                "amount": float(mono_tx.uah_amount),
+                "second_amount": float(mono_tx.second_amount),
                 "category": mono_tx.category,
                 "labels": mono_tx.labels,
                 "currency": mono_tx.currency,
-                "original_amount": float(mono_tx.original_amount),
+                "primary_amount": float(mono_tx.primary_amount),
             },
             "spendee": {
-                "amount": float(spendee_tx.uah_amount),
+                "second_amount": float(spendee_tx.second_amount),
                 "category": spendee_tx.category,
                 "labels": spendee_tx.labels,
             },
             "matches": {
                 "category": mono_tx.category == spendee_tx.category,
                 "labels": mono_tx.labels == spendee_tx.labels,
-                "amount_diff": float(abs(mono_tx.uah_amount - spendee_tx.uah_amount))
+                "amount_diff": float(abs(mono_tx.second_amount - spendee_tx.second_amount))
             }
         })
 

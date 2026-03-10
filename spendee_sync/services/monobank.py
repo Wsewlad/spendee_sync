@@ -107,8 +107,8 @@ class MonobankService:
                 Transaction(
                     id=str(item.get("id")) if item.get("id") is not None else None,
                     date=dt,
-                    original_amount=operation_amount,
-                    uah_amount=amount,
+                    primary_amount=operation_amount,
+                    second_amount=amount,
                     currency=CURRENCY_NUM_TO_ALPHA.get(int(currency_code), str(currency_code)),
                     mcc=item.get("mcc"),
                     description=description,

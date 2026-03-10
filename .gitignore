@@ -216,3 +216,7 @@ raw_items.json
 
 # VSCode
 .vscode/
+
+
+#Ignore cursor AI rules
+.cursor/rules/codacy.mdc

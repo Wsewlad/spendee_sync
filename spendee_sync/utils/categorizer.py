@@ -159,14 +159,14 @@ def categorize_transaction(tx: Transaction, mcc_rules: dict[str, list[int]], key
         description = (tx.description or "").lower()
         for pattern, category in keyword_patterns:
             if pattern.search(description):
-                return tx.copy(update={"category": category})
+                return tx.model_copy(update={"category": category})
 
     # 1) Try MCC code lookup
     if tx.mcc and mcc_rules:
         for category, mcc_codes in mcc_rules.items():
             if tx.mcc in mcc_codes:
-                return tx.copy(update={"category": category})
+                return tx.model_copy(update={"category": category})
 
     # 3) Fallback based on amount sign
-    fallback = "Income" if tx.uah_amount > 0 else "Other"
-    return tx.copy(update={"category": fallback})
+    fallback = "Income" if tx.second_amount > 0 else "Other"
+    return tx.model_copy(update={"category": fallback})
