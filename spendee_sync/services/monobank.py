@@ -24,10 +24,18 @@ CURRENCY_NUM_TO_ALPHA = {
 
 
 class MonobankService:
-    def __init__(self, token: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        token: Optional[str] = None,
+        iban: Optional[str] = None,
+        card_type: Optional[str] = None,
+    ) -> None:
         self.token = token or os.getenv("MONOBANK_TOKEN")
         if not self.token:
             raise ValueError("MONOBANK_TOKEN is required. Set it in environment or .env file.")
+        # Allow explicit iban/card_type; fall back to env vars for single-account mode
+        self._iban = iban
+        self._card_type = card_type
         self.session = requests.Session()
         self.session.headers.update({"X-Token": self.token})
 
@@ -42,8 +50,8 @@ class MonobankService:
 
     def get_account(self) -> dict:
         info = self.get_client_info()
-        iban = os.getenv("IBAN")
-        card_type = os.getenv("CARD_TYPE")
+        iban = self._iban or os.getenv("IBAN")
+        card_type = self._card_type or os.getenv("CARD_TYPE")
         accounts = info.get("accounts", [])
         accounts = [a for a in accounts if "iban" in a and a["iban"] == iban and a["type"] == card_type]
         if not any(accounts):
