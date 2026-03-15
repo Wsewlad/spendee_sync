@@ -9,7 +9,12 @@ from dotenv import load_dotenv
 from spendee_sync.services.monobank import MonobankService
 from spendee_sync.utils.categorizer import categorize_transaction, load_rules_from_env
 from spendee_sync.services.spendee import SpendeeService
-from spendee_sync.utils.diff_engine import compute_missing
+from collections import Counter
+
+from spendee_sync.utils.diff_engine import compute_missing, compute_missing_fuzzy
+from spendee_sync.utils.state import ImportStateDB, compute_missing_fuzzy
+from spendee_sync.utils.notifier import Notifier
+from spendee_sync.utils.state import ImportStateDB
 
 
 def export_comparison_csv(mono_txs: list, spendee_txs: list, output_path: str) -> None:
@@ -90,15 +95,26 @@ def task():
     existing_csv_path = "spendee_sync/outputs/existing_in_spendee.csv"
     existing_json_path = "spendee_sync/outputs/existing_in_spendee.json"
 
+    state_db = ImportStateDB()
+    state_db = ImportStateDB()
     mono_service = MonobankService()
     spendee_service = SpendeeService()
     mcc_rules, keyword_patterns = load_rules_from_env()
     mono_txs = [categorize_transaction(t, mcc_rules, keyword_patterns) for t in mono_service.fetch_transactions(days=days)]
     spendee_txs = spendee_service.parse_export(spendee_xlsx)
-    missing = [categorize_transaction(t, mcc_rules, keyword_patterns) for t in compute_missing(mono_txs, spendee_txs)]
+    missing = [categorize_transaction(t, mcc_rules, keyword_patterns) for t in compute_missing_fuzzy(mono_txs, spendee_txs)]
+
+    # Filter out transactions already recorded in the state DB
+    missing = state_db.filter_already_imported(missing)
 
     # Export missing transactions
     spendee_service.export_csv(missing, missing_csv_path)
+
+    # Record the exported transactions in the state DB
+    state_db.mark_imported(missing)
+
+    # Record the exported transactions in the state DB
+    state_db.mark_imported(missing)
 
     # Find existing transactions (transactions in both mono and spendee)
     missing_keys = {tx.unique_key() for tx in missing}
@@ -107,6 +123,15 @@ def task():
     # Export existing transactions comparison (CSV and JSON)
     export_comparison_csv(existing_mono, spendee_txs, existing_csv_path)
     export_comparison_json(existing_mono, spendee_txs, existing_json_path)
+
+    # Send notifications
+    categories = dict(Counter(tx.category or "Uncategorized" for tx in missing))
+    Notifier().notify_sync_complete(
+        fetched=len(mono_txs),
+        missing=len(missing),
+        categories=categories,
+        output_path=missing_csv_path,
+    )
 
 
 def main():

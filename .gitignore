@@ -220,3 +220,7 @@ raw_items.json
 
 #Ignore cursor AI rules
 .cursor/rules/codacy.mdc
+
+# Spendee Sync state DB
+spendee_sync_state.db
+spendee_sync_state.db
