@@ -170,3 +170,33 @@ def categorize_transaction(tx: Transaction, mcc_rules: dict[str, list[int]], key
     # 3) Fallback based on amount sign
     fallback = "Income" if tx.second_amount > 0 else "Other"
     return tx.model_copy(update={"category": fallback})
+
+
+def categorize_transaction_with_ml(
+    tx: Transaction,
+    mcc_rules: dict[str, list[int]],
+    keyword_patterns: list[tuple[re.Pattern, str]],
+    ml_categorizer: Any = None,
+) -> Transaction:
+    """Categorize a transaction using ML when available, falling back to rule-based logic.
+
+    Categorization priority:
+    1. ML prediction (when model is loaded and confidence >= threshold)
+    2. Rule-based categorization (MCC codes + keyword patterns + amount fallback)
+
+    Args:
+        tx: Transaction to categorize.
+        mcc_rules: MCC code lookup rules {"Category": [mcc_codes]}.
+        keyword_patterns: Compiled keyword patterns [(pattern, category)].
+        ml_categorizer: Optional MLCategorizer instance. When None or not trained,
+            falls back immediately to rule-based logic.
+
+    Returns:
+        Transaction with category field populated.
+    """
+    if ml_categorizer is not None and ml_categorizer.is_trained():
+        category, confidence = ml_categorizer.predict(tx.description or "")
+        if category is not None and confidence >= ml_categorizer.confidence_threshold:
+            return tx.model_copy(update={"category": category})
+
+    return categorize_transaction(tx, mcc_rules, keyword_patterns)
