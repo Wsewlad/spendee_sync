@@ -2,19 +2,18 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from collections import Counter
 from pathlib import Path
+from typing import Optional
 
 from dotenv import load_dotenv
 
+from spendee_sync.config import SpendeeSyncConfig
 from spendee_sync.services.monobank import MonobankService
+from spendee_sync.services.wise import WiseService
 from spendee_sync.utils.categorizer import categorize_transaction, load_rules_from_env
 from spendee_sync.services.spendee import SpendeeService
-import re
-from typing import Optional
-
-from spendee_sync.config import SpendeeSyncConfig
-from spendee_sync.services.wise import WiseService
 from spendee_sync.utils.diff_engine import compute_missing, compute_missing_fuzzy
 from spendee_sync.utils.notifier import Notifier
 from spendee_sync.utils.state import ImportStateDB
