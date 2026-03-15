@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections import Counter
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -9,10 +10,7 @@ from dotenv import load_dotenv
 from spendee_sync.services.monobank import MonobankService
 from spendee_sync.utils.categorizer import categorize_transaction, load_rules_from_env
 from spendee_sync.services.spendee import SpendeeService
-from collections import Counter
-
 from spendee_sync.utils.diff_engine import compute_missing, compute_missing_fuzzy
-from spendee_sync.utils.state import ImportStateDB, compute_missing_fuzzy
 from spendee_sync.utils.notifier import Notifier
 from spendee_sync.utils.state import ImportStateDB
 
@@ -96,7 +94,6 @@ def task():
     existing_json_path = "spendee_sync/outputs/existing_in_spendee.json"
 
     state_db = ImportStateDB()
-    state_db = ImportStateDB()
     mono_service = MonobankService()
     spendee_service = SpendeeService()
     mcc_rules, keyword_patterns = load_rules_from_env()
@@ -109,9 +106,6 @@ def task():
 
     # Export missing transactions
     spendee_service.export_csv(missing, missing_csv_path)
-
-    # Record the exported transactions in the state DB
-    state_db.mark_imported(missing)
 
     # Record the exported transactions in the state DB
     state_db.mark_imported(missing)
@@ -141,4 +135,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
