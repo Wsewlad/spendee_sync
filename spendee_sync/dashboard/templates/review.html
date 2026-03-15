@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Review Transactions — Spendee Sync{% endblock %}
+{% block content %}
+<h1>Review Transactions</h1>
+<p>
+  These are the {{ transactions | length }} transaction(s) that will be included in the export.
+  Categories and labels shown here already include any edits you made.
+</p>
+
+<p>
+  <a href="/export" role="button">Download CSV</a>
+  <a href="/transactions" style="margin-left:0.8rem;">Back to editing</a>
+</p>
+
+{% if transactions %}
+<div style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Labels</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in transactions %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td style="white-space:nowrap;">{{ tx.date }}</td>
+        <td>
+          {% if tx.type == "Income" %}
+            <span class="badge badge-income">Income</span>
+          {% else %}
+            <span class="badge badge-expense">Expense</span>
+          {% endif %}
+        </td>
+        <td>{{ tx.description }}</td>
+        <td style="text-align:right; white-space:nowrap;">{{ tx.amount }}</td>
+        <td>{{ tx.category or "" }}</td>
+        <td>{{ tx.labels or "" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p>
+  <a href="/export" role="button">Download CSV</a>
+</p>
+{% else %}
+<p>No transactions to review. <a href="/">Run a sync</a> first.</p>
+{% endif %}
+{% endblock %}

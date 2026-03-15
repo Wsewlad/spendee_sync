@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Spendee Sync{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+  <style>
+    nav.top-nav {
+      background: var(--pico-primary-background);
+      padding: 0.6rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    nav.top-nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    nav.top-nav a:hover {
+      text-decoration: underline;
+    }
+    nav.top-nav .brand {
+      font-size: 1.1rem;
+      margin-right: auto;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-income { background: #d1fae5; color: #065f46; }
+    .badge-expense { background: #fee2e2; color: #991b1b; }
+    .flash { padding: 0.6rem 1rem; border-radius: 0.4rem; margin-bottom: 1rem; }
+    .flash-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <span class="brand">Spendee Sync</span>
+    <a href="/">Summary</a>
+    <a href="/transactions">Pending</a>
+    <a href="/review">Review</a>
+    <a href="/export">Export CSV</a>
+    <a href="/api/status">API Status</a>
+  </nav>
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

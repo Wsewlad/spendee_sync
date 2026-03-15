@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Summary — Spendee Sync{% endblock %}
+{% block content %}
+<h1>Dashboard Summary</h1>
+
+{% if request.query_params.get("sync") == "started" %}
+<div class="flash flash-info">Sync started in the background. Refresh in a moment.</div>
+{% elif request.query_params.get("sync") == "already_running" %}
+<div class="flash flash-info">A sync is already in progress — please wait.</div>
+{% endif %}
+
+<div class="grid">
+  <article>
+    <header><strong>Pending Transactions</strong></header>
+    <p style="font-size:2.5rem; margin:0;">{{ summary.total }}</p>
+    <footer>transactions waiting for import</footer>
+  </article>
+
+  <article>
+    <header><strong>Last Sync</strong></header>
+    <p style="font-size:1rem; margin:0;">
+      {% if summary.last_sync %}
+        {{ summary.last_sync }}
+      {% else %}
+        Never
+      {% endif %}
+    </p>
+    <footer>UTC timestamp</footer>
+  </article>
+
+  <article>
+    <header><strong>Sync Status</strong></header>
+    <p style="font-size:1rem; margin:0;">
+      {% if sync_running %}
+        <span style="color:#d97706;">Running…</span>
+      {% else %}
+        Idle
+      {% endif %}
+    </p>
+    <footer>
+      <form method="post" action="/sync" style="margin:0;">
+        <button type="submit" {% if sync_running %}disabled{% endif %}>Trigger Sync</button>
+      </form>
+    </footer>
+  </article>
+</div>
+
+<h2>Categories Breakdown</h2>
+{% if summary.categories %}
+<table>
+  <thead>
+    <tr><th>Category</th><th>Count</th></tr>
+  </thead>
+  <tbody>
+    {% for cat, count in summary.categories.items() | sort %}
+    <tr>
+      <td>{{ cat }}</td>
+      <td>{{ count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No pending transactions. <a href="/sync">Run a sync</a> to fetch new data.</p>
+{% endif %}
+
+<p><a href="/transactions" role="button">View Pending Transactions</a></p>
+{% endblock %}

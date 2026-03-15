@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Pending Transactions — Spendee Sync{% endblock %}
+{% block content %}
+<h1>Pending Transactions</h1>
+<p>
+  {{ transactions | length }} transaction(s) waiting to be imported into Spendee.
+  Edit category or labels inline, then go to <a href="/review">Review</a> to export.
+</p>
+
+{% if transactions %}
+<div style="overflow-x:auto;">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Labels</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in transactions %}
+      <tr id="row-{{ tx.id }}">
+        <td style="white-space:nowrap;">{{ tx.date }}</td>
+        <td>
+          {% if tx.type == "Income" %}
+            <span class="badge badge-income">Income</span>
+          {% else %}
+            <span class="badge badge-expense">Expense</span>
+          {% endif %}
+        </td>
+        <td>{{ tx.description }}</td>
+        <td style="text-align:right; white-space:nowrap;">{{ tx.amount }}</td>
+        <td colspan="3">
+          <form method="post" action="/transactions/{{ tx.id }}/edit" style="display:flex; gap:0.4rem; align-items:center; margin:0; flex-wrap:wrap;">
+            <input
+              type="text"
+              name="category"
+              value="{{ tx.category }}"
+              placeholder="Category"
+              style="min-width:120px; flex:1; margin:0; padding:0.25rem 0.4rem;"
+            />
+            <input
+              type="text"
+              name="labels"
+              value="{{ tx.labels }}"
+              placeholder="Labels (comma-separated)"
+              style="min-width:150px; flex:1.5; margin:0; padding:0.25rem 0.4rem;"
+            />
+            <button type="submit" style="padding:0.25rem 0.7rem; font-size:0.85rem; white-space:nowrap;">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p>
+  <a href="/review" role="button">Review &amp; Export</a>
+</p>
+{% else %}
+<p>No pending transactions found. <a href="/">Run a sync</a> to fetch data from Monobank.</p>
+{% endif %}
+{% endblock %}
