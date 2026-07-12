@@ -72,6 +72,12 @@ CATEGORIZATION_RULES_JSON=path/to/your/rules.json
 
 # Default wallet name for imports
 WALLET_NAME=Main Wallet
+
+# Wise credentials (required only for syncing Wise transactions)
+WISE_TOKEN=your_wise_api_token_here
+WISE_PROFILE_ID=your_wise_profile_id  # auto-resolved from the token if omitted
+WISE_ACCOUNT_ID=your_wise_account_id  # optional
+WISE_API=https://api.sandbox.transferwise.tech  # optional, defaults to production
 ```
 
 ## Usage
@@ -250,9 +256,28 @@ spendee_sync/
 # Install dev dependencies
 pip install -e ".[dev]"
 
-# Run tests (if available)
+# Run tests
 pytest
 ```
+
+By default `pytest` only collects the integration tests under `tests/` and
+skips them, since they hit real external services. To actually run them
+against live accounts, copy `.env.example` to `.env`, fill in real
+credentials, and re-run `pytest`:
+
+- **Monobank** (`tests/test_monobank_integration.py`) runs whenever
+  `MONOBANK_TOKEN`, `IBAN`, and `CARD_TYPE` are set. It's read-only.
+- **Wise** (`tests/test_wise_integration.py`) runs whenever `WISE_TOKEN` is
+  set. It's read-only.
+- **Spendee** (`tests/test_spendee_integration.py`) drives a real Chrome
+  browser to log in and import a transaction, which **mutates your real
+  Spendee wallet**. It requires `SPENDEE_EMAIL`/`SPENDEE_PASSWORD` *and* an
+  explicit `RUN_SPENDEE_IMPORT_TEST=1` to opt in, plus Chrome/Chromium
+  installed locally.
+
+These tests can't run in a network-sandboxed environment — they need real
+outbound access to `api.monobank.ua`, `api.transferwise.com`, and
+`web.spendee.com`.
 
 ### Code Formatting
 

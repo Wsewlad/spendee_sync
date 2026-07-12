@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spendee-sync"
+version = "0.1.0"
+description = "Sync Monobank/Wise transactions to Spendee with smart categorization"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "tenacity>=8.2",
+    "pydantic>=2.0",
+    "pandas>=2.0",
+    "python-dotenv>=1.0",
+    "selenium>=4.20",
+    "webdriver-manager>=4.0",
+    "openpyxl>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+spendee-sync = "spendee_sync.task:main"
+
+[tool.setuptools.packages.find]
+include = ["spendee_sync*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: hits a real external service; requires live credentials in .env",
+]
