@@ -12,7 +12,6 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from spendee_sync.models.transaction import Transaction, TransactionType
 from spendee_sync.utils.categorizer import load_labels_from_file, assign_labels
 
-
 MONOBANK_API = "https://api.monobank.ua"
 
 CURRENCY_NUM_TO_ALPHA = {
@@ -45,7 +44,9 @@ class MonobankService:
         iban = os.getenv("IBAN")
         card_type = os.getenv("CARD_TYPE")
         accounts = info.get("accounts", [])
-        accounts = [a for a in accounts if "iban" in a and a["iban"] == iban and a["type"] == card_type]
+        accounts = [
+            a for a in accounts if "iban" in a and a["iban"] == iban and a["type"] == card_type
+        ]
         if not any(accounts):
             raise ValueError(f"Account with IBAN {iban} not found")
         return accounts[0]
@@ -57,7 +58,6 @@ class MonobankService:
 
     def fetch_transactions(self, days: int = 30) -> list[Transaction]:
         until = datetime.now(timezone.utc)
-        since = until - timedelta(days=days)
         transactions: list[Transaction] = []
         account = self.get_account()
         account_id = account["id"]

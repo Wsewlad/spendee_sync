@@ -9,7 +9,9 @@ from typing import Any
 from ..models import Transaction
 
 
-def _compile_keyword_patterns(category_to_keywords: dict[str, list[Any]]) -> list[tuple[re.Pattern, str]]:
+def _compile_keyword_patterns(
+    category_to_keywords: dict[str, list[Any]],
+) -> list[tuple[re.Pattern, str]]:
     """Compile keyword lists into regex patterns for fast matching.
 
     Args:
@@ -79,7 +81,9 @@ def load_rules_from_env() -> tuple[dict[str, list[int]], list[tuple[re.Pattern, 
                 # Extract MCC codes
                 mcc_list = rules.get("mcc", [])
                 if isinstance(mcc_list, list) and mcc_list:
-                    mcc_rules[category] = [int(code) for code in mcc_list if isinstance(code, (int, str))]
+                    mcc_rules[category] = [
+                        int(code) for code in mcc_list if isinstance(code, (int, str))
+                    ]
 
                 # Extract keywords
                 kw_list = rules.get("keywords", [])
@@ -123,7 +127,9 @@ def load_labels_from_file() -> dict[str, list[str]]:
         if isinstance(data, dict):
             for label, words in data.items():
                 if isinstance(words, list):
-                    labels[str(label)] = [str(w).lower() for w in words if isinstance(w, (str, bytes))]
+                    labels[str(label)] = [
+                        str(w).lower() for w in words if isinstance(w, (str, bytes))
+                    ]
         return labels
     except Exception:
         return {}
@@ -139,7 +145,9 @@ def assign_labels(note: str, labels_rules: dict[str, list[str]]) -> list[str]:
     return found
 
 
-def categorize_transaction(tx: Transaction, mcc_rules: dict[str, list[int]], keyword_patterns: list[tuple[re.Pattern, str]]) -> Transaction:
+def categorize_transaction(
+    tx: Transaction, mcc_rules: dict[str, list[int]], keyword_patterns: list[tuple[re.Pattern, str]]
+) -> Transaction:
     """Categorize a transaction based on MCC codes and keywords.
 
     Categorization priority:

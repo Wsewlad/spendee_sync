@@ -12,7 +12,6 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from spendee_sync.models.transaction import Transaction, TransactionType
 from spendee_sync.utils.categorizer import load_labels_from_file, assign_labels
 
-
 # Wise public API base; can be overridden for sandbox via env
 WISE_API = os.getenv("WISE_API", "https://api.transferwise.com")
 
@@ -29,7 +28,9 @@ class WiseService:
                 "Accept": "application/json",
             }
         )
-        self.profile_id = profile_id or os.getenv("WISE_PROFILE_ID") or self._resolve_default_profile_id()
+        self.profile_id = (
+            profile_id or os.getenv("WISE_PROFILE_ID") or self._resolve_default_profile_id()
+        )
         self.account_id = os.getenv("WISE_ACCOUNT_ID")  # optional; used for statements if needed
 
     @retry(wait=wait_exponential(multiplier=1, min=1, max=10), stop=stop_after_attempt(5))
@@ -55,7 +56,9 @@ class WiseService:
                 raise ValueError("Wise: failed to resolve profile id")
             return str(pid)
         except Exception as exc:
-            raise ValueError(f"WISE_PROFILE_ID is required and could not be resolved automatically: {exc}")
+            raise ValueError(
+                f"WISE_PROFILE_ID is required and could not be resolved automatically: {exc}"
+            )
 
     @staticmethod
     def _strip_format_tags(text: str) -> str:
@@ -116,7 +119,9 @@ class WiseService:
 
         title = self._strip_format_tags(activity.get("title") or "")
         description = activity.get("description") or ""
-        full_description = title if not description else f"{title}: {description}".strip(": ").strip()
+        full_description = (
+            title if not description else f"{title}: {description}".strip(": ").strip()
+        )
 
         primary_amount_raw = activity.get("primaryAmount")
         primary_value, primary_currency = self._parse_amount_field(primary_amount_raw)
@@ -146,8 +151,16 @@ class WiseService:
         return Transaction(
             id=str(activity.get("id") or ""),
             date=dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc),
-            primary_amount=primary_value.copy_abs().copy_negate() if primary_value.is_signed() else primary_value,
-            second_amount=second_amount.copy_abs().copy_negate() if second_amount.is_signed() else second_amount,
+            primary_amount=(
+                primary_value.copy_abs().copy_negate()
+                if primary_value.is_signed()
+                else primary_value
+            ),
+            second_amount=(
+                second_amount.copy_abs().copy_negate()
+                if second_amount.is_signed()
+                else second_amount
+            ),
             currency=primary_currency or "",
             mcc=0,
             description=full_description,
@@ -161,7 +174,9 @@ class WiseService:
             raw=activity,
         )
 
-    def fetch_activities(self, days: int = 30, limit: int = 250, max_pages: Optional[int] = None) -> list[dict]:
+    def fetch_activities(
+        self, days: int = 30, limit: int = 250, max_pages: Optional[int] = None
+    ) -> list[dict]:
         """
         Fetch Wise activities for the profile.
         Supports Wise pagination via 'cursor' and response shapes:
@@ -244,5 +259,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

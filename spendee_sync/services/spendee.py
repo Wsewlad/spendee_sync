@@ -15,7 +15,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from spendee_sync.models.transaction import Transaction, TransactionType
 
-
 SPENDEE_URL = "https://web.spendee.com"
 SPENDEE_COLUMNS = [
     "Date",
@@ -39,7 +38,9 @@ def _row_for_spendee(tx: Transaction) -> list[str]:
     from datetime import timezone as _tz
 
     date_str = tx.date.astimezone(_tz.utc).isoformat(timespec="seconds")
-    tx_type = TransactionType.INCOME.value if tx.second_amount >= 0 else TransactionType.EXPENSE.value
+    tx_type = (
+        TransactionType.INCOME.value if tx.second_amount >= 0 else TransactionType.EXPENSE.value
+    )
     category_name = tx.category or ""
     amount_str = f"{tx.second_amount:.2f}"
     labels = ", ".join(tx.labels) if getattr(tx, "labels", None) else ""
@@ -58,22 +59,17 @@ def _row_for_spendee(tx: Transaction) -> list[str]:
 
     note = " ".join(note_parts)
 
-    return [
-        date_str,
-        tx_type,
-        category_name,
-        amount_str,
-        note,
-        labels
-    ]
+    return [date_str, tx_type, category_name, amount_str, note, labels]
 
 
 class SpendeeService:
     def parse_export(self, path: str) -> list[Transaction]:
         """Parse a Spendee export file.
 
-        Supports CSV exports with headers: Date, Wallet, Type, Category name, Amount, Currency, Note, Labels, Author
-        Also keeps backward-compat for XLSX by falling back to previous logic when extension is .xlsx/.xls.
+        Supports CSV exports with headers: Date, Wallet, Type, Category name,
+        Amount, Currency, Note, Labels, Author.
+        Also keeps backward-compat for XLSX by falling back to previous logic
+        when extension is .xlsx/.xls.
         """
         from decimal import Decimal
         from datetime import timezone as _tz
@@ -107,7 +103,11 @@ class SpendeeService:
                     category = (row.get("Category name") or "").strip() or None
                     note = (row.get("Note") or "").strip()
                     labels_str = (row.get("Labels") or "").strip()
-                    labels = [s.strip() for s in labels_str.split(",") if s.strip()] if labels_str else []
+                    labels = (
+                        [s.strip() for s in labels_str.split(",") if s.strip()]
+                        if labels_str
+                        else []
+                    )
                     wallet = (row.get("Wallet") or "").strip()
                     tx_type_raw = (row.get("Type") or "").strip()
                     tx_type = TransactionType(tx_type_raw)
@@ -192,7 +192,9 @@ class SpendeeService:
 
             if wallet_name:
                 try:
-                    wait.until(EC.element_to_be_clickable((By.XPATH, "//div[@role='combobox']"))).click()
+                    wait.until(
+                        EC.element_to_be_clickable((By.XPATH, "//div[@role='combobox']"))
+                    ).click()
                     wait.until(
                         EC.element_to_be_clickable(
                             (By.XPATH, f"//div[@role='option' and contains(., '{wallet_name}')]"),
@@ -201,11 +203,15 @@ class SpendeeService:
                 except Exception:
                     pass
 
-            file_input = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file']")))
+            file_input = wait.until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file']"))
+            )
             file_input.send_keys(fp)
 
             try:
-                wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Import')]"))).click()
+                wait.until(
+                    EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Import')]"))
+                ).click()
             except Exception:
                 pass
 
